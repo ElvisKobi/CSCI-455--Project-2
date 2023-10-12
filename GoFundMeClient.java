@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -10,13 +11,13 @@ public class GoFundMeClient {
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-             DataInputStream in = new DataInputStream(socket.getInputStream());
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
+                DataInputStream in = new DataInputStream(socket.getInputStream());
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                Scanner scanner = new Scanner(System.in)) { // Close the scanner using try-with-resources
 
-            Scanner scanner = new Scanner(System.in);
             while (true) {
-                double targetAmount; // Moved here
-                Date deadline;       // Moved here
+                double targetAmount;
+                Date deadline;
 
                 System.out.println("Choose an option:");
                 System.out.println("1. Create a new fundraising event");
@@ -38,7 +39,12 @@ public class GoFundMeClient {
                         System.out.println("Enter deadline (in format yyyy-MM-dd):");
                         scanner.nextLine();
                         String deadlineStr = scanner.nextLine();
-                        deadline = new SimpleDateFormat("yyyy-MM-dd").parse(deadlineStr);
+                        try {
+                            deadline = new SimpleDateFormat("yyyy-MM-dd").parse(deadlineStr);
+                        } catch (ParseException e) {
+                            System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
+                            continue; // Skip to the next iteration of the loop
+                        }
 
                         out.writeUTF("CREATE_EVENT");
                         out.writeUTF(eventName);
@@ -60,7 +66,8 @@ public class GoFundMeClient {
                             double currentAmount = in.readDouble();
                             deadline = new Date(in.readLong());
                             System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                i + 1, name, targetAmount, currentAmount, new SimpleDateFormat("yyyy-MM-dd").format(deadline));
+                                    i + 1, name, targetAmount, currentAmount,
+                                    new SimpleDateFormat("yyyy-MM-dd").format(deadline));
                         }
 
                         int pastEventCount = in.readInt();
@@ -71,7 +78,8 @@ public class GoFundMeClient {
                             double currentAmount = in.readDouble();
                             deadline = new Date(in.readLong());
                             System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                i + 1, name, targetAmount, currentAmount, new SimpleDateFormat("yyyy-MM-dd").format(deadline));
+                                    i + 1, name, targetAmount, currentAmount,
+                                    new SimpleDateFormat("yyyy-MM-dd").format(deadline));
                         }
                         break;
 
@@ -101,8 +109,9 @@ public class GoFundMeClient {
                         targetAmount = in.readDouble();
                         double currentAmount = in.readDouble();
                         deadline = new Date(in.readLong());
-                        System.out.printf("Event Details:\nName: %s\nTarget Amount: $%.2f\nAmount Raised: $%.2f\nDeadline: %s\n",
-                            name, targetAmount, currentAmount, new SimpleDateFormat("yyyy-MM-dd").format(deadline));
+                        System.out.printf(
+                                "Event Details:\nName: %s\nTarget Amount: $%.2f\nAmount Raised: $%.2f\nDeadline: %s\n",
+                                name, targetAmount, currentAmount, new SimpleDateFormat("yyyy-MM-dd").format(deadline));
                         break;
 
                     case 5:

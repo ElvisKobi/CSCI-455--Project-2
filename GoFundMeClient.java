@@ -44,7 +44,7 @@ public class GoFundMeClient {
                             System.out.println("---------------------------------");
                             String eventName = getStringInput(scanner, "Enter event name: ");
                             double targetAmount = getDoubleInput(scanner, "Enter target amount: ", 0);
-                            Date deadline = getDateInput(scanner, "Enter deadline (in format yyyy-MM-dd): ");
+                            Date deadline = getDateInput(scanner, "Enter deadline (in format MM-dd-yyyy): ");
 
                             out.writeUTF("CREATE_EVENT");
                             out.writeUTF(eventName);
@@ -68,7 +68,7 @@ public class GoFundMeClient {
                                 deadline = new Date(in.readLong());
                                 System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
                                         i + 1, name, targetAmount, currentAmount,
-                                        new SimpleDateFormat("yyyy-MM-dd").format(deadline));
+                                        new SimpleDateFormat("MM-dd-yyyy").format(deadline));
                             }
 
                             int pastEventCount = in.readInt();
@@ -80,7 +80,7 @@ public class GoFundMeClient {
                                 deadline = new Date(in.readLong());
                                 System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
                                         i + 1, name, targetAmount, currentAmount,
-                                        new SimpleDateFormat("yyyy-MM-dd").format(deadline));
+                                        new SimpleDateFormat("MM-dd-yyyy").format(deadline));
                             }
                             break;
 
@@ -115,7 +115,7 @@ public class GoFundMeClient {
                             System.out.printf(
                                     "Event Details:\nName: %s\nTarget Amount: $%.2f\nAmount Raised: $%.2f\nDeadline: %s\n",
                                     name, targetAmount, currentAmount,
-                                    new SimpleDateFormat("yyyy-MM-dd").format(deadline));
+                                    new SimpleDateFormat("MM-dd-yyyy").format(deadline));
                             break;
 
                         case 5:
@@ -186,12 +186,15 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user to enter a date in the format "yyyy-MM-dd" and returns a Date object.
-     * If the user enters an invalid date format, the method will prompt the user again until a valid date is entered.
+     * Prompts the user to enter a date in the format "MM-dd-yyyy" and returns a
+     * Date object.
+     * If the user enters an invalid date format, the method will prompt the user
+     * again until a valid date is entered.
      * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt the prompt message to display to the user
-     * @return a Date object representing the user's input in the format "yyyy-MM-dd"
+     * @param prompt  the prompt message to display to the user
+     * @return a Date object representing the user's input in the format
+     *         "MM-dd-yyyy"
      */
     private static Date getDateInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
@@ -199,10 +202,12 @@ public class GoFundMeClient {
         while (date == null) {
             String input = scanner.nextLine();
             try {
-                date = new SimpleDateFormat("yyyy-MM-dd").parse(input);
+                date = new SimpleDateFormat("MM-dd-yyyy").parse(input);
             } catch (ParseException e) {
-                System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
-                System.out.print(prompt); // Prompt again after an invalid date format
+                System.out.println("Invalid date format. Please enter the date in MM-dd-yyyy format.");
+            }
+            if (date == null) {
+                System.out.print(prompt);
             }
         }
         return date;

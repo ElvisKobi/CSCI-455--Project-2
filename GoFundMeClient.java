@@ -5,10 +5,16 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * This class represents a client for the GoFundMe application. It allows users to create new fundraising events, list fundraising events, donate to an event, check event details, and exit the application. The client communicates with the server using sockets and sends/receives data using DataInputStream and DataOutputStream. 
- * The client prompts the user for input using Scanner and validates the input before sending it to the server. 
- * The client runs in an infinite loop to allow for reconnect attempts in case the connection to the server is lost. 
- * The server address and port are set as constants in the class. 
+ * This class represents a client for the GoFundMe application. It allows users
+ * to create new fundraising events, list fundraising events, donate to an
+ * event, check event details, and exit the application. The client communicates
+ * with the server using sockets and sends/receives data using DataInputStream
+ * and DataOutputStream.
+ * The client prompts the user for input using Scanner and validates the input
+ * before sending it to the server.
+ * The client runs in an infinite loop to allow for reconnect attempts in case
+ * the connection to the server is lost.
+ * The server address and port are set as constants in the class.
  */
 public class GoFundMeClient {
 
@@ -131,11 +137,13 @@ public class GoFundMeClient {
     }
 
     /**
-     * This method prompts the user for input using the provided prompt string and returns the input as a trimmed string.
-     * If the input is empty, the method will continue to prompt the user until a non-empty input is provided.
+     * This method prompts the user for input using the provided prompt string and
+     * returns the input as a trimmed string.
+     * If the input is empty, the method will continue to prompt the user until a
+     * non-empty input is provided.
      * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt the prompt string to display to the user
+     * @param prompt  the prompt string to display to the user
      * @return the user's input as a trimmed string
      */
     private static String getStringInput(Scanner scanner, String prompt) {
@@ -150,10 +158,13 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user for a double input and returns the value if it is greater than the specified minimum value.
-     * If the user enters an invalid input, the method will prompt the user to enter a positive number.
-     * @param scanner the Scanner object used to read user input
-     * @param prompt the message to display to the user when prompting for input
+     * Prompts the user for a double input and returns the value if it is greater
+     * than the specified minimum value.
+     * If the user enters an invalid input, the method will prompt the user to enter
+     * a positive number.
+     * 
+     * @param scanner  the Scanner object used to read user input
+     * @param prompt   the message to display to the user when prompting for input
      * @param minValue the minimum value that the input must be greater than
      * @return the double value entered by the user
      */
@@ -175,41 +186,38 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user to enter a date in yyyy-MM-dd format and returns a Date object.
-     * The method ensures that the entered date is in the future.
+     * Prompts the user to enter a date in the format "yyyy-MM-dd" and returns a Date object.
+     * If the user enters an invalid date format, the method will prompt the user again until a valid date is entered.
+     * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt the prompt to display to the user
-     * @return a Date object representing the user's input
+     * @param prompt the prompt message to display to the user
+     * @return a Date object representing the user's input in the format "yyyy-MM-dd"
      */
     private static Date getDateInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
         Date date = null;
-        Date today = new Date(); // Gets the current date and time
         while (date == null) {
             String input = scanner.nextLine();
             try {
                 date = new SimpleDateFormat("yyyy-MM-dd").parse(input);
-                if (!date.after(today)) { // Check if the date is after the current date
-                    System.out.println("The date should be in the future. Please enter again.");
-                    date = null; // Reset date to null to continue the loop
-                }
             } catch (ParseException e) {
                 System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
-            }
-            if (date == null) { // If date is still null (either due to format error or past date), prompt again
-                System.out.print(prompt);
+                System.out.print(prompt); // Prompt again after an invalid date format
             }
         }
         return date;
     }
 
     /**
-     * This method prompts the user to enter an integer value within a specified range and returns the value.
-     * If the user enters an invalid input, the method will prompt the user to enter a number between the specified range.
+     * This method prompts the user to enter an integer value within a specified
+     * range and returns the value.
+     * If the user enters an invalid input, the method will prompt the user to enter
+     * a number between the specified range.
+     * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt the message to prompt the user for input
-     * @param min the minimum value of the range (inclusive)
-     * @param max the maximum value of the range (inclusive)
+     * @param prompt  the message to prompt the user for input
+     * @param min     the minimum value of the range (inclusive)
+     * @param max     the maximum value of the range (inclusive)
      * @return the integer value entered by the user within the specified range
      */
     private static int getIntInput(Scanner scanner, String prompt, int min, int max) {

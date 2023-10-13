@@ -52,24 +52,29 @@ public class GoFundMeServer {
         @Override
         public void run() {
             try {
-                String requestType = in.readUTF();
+                while (true) { // Keep the connection open until the client disconnects
+                    String requestType = in.readUTF();
 
-                switch (requestType) {
-                    case "CREATE_EVENT":
-                        createEvent();
-                        break;
-                    case "LIST_EVENTS":
-                        listEvents();
-                        break;
-                    case "DONATE":
-                        donate();
-                        break;
-                    case "CHECK_DETAILS":
-                        checkDetails();
-                        break;
-                    default:
-                        out.writeUTF("Invalid request type.");
+                    switch (requestType) {
+                        case "CREATE_EVENT":
+                            createEvent();
+                            break;
+                        case "LIST_EVENTS":
+                            listEvents();
+                            break;
+                        case "DONATE":
+                            donate();
+                            break;
+                        case "CHECK_DETAILS":
+                            checkDetails();
+                            break;
+                        default:
+                            out.writeUTF("Invalid request type.");
+                    }
                 }
+            } catch (EOFException eof) {
+                // This exception is thrown when the client disconnects
+                System.out.println("Client disconnected.");
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

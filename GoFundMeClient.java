@@ -28,8 +28,7 @@ public class GoFundMeClient {
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                     Scanner scanner = new Scanner(System.in)) {
 
-                int currentEventCount = 0;
-                int pastEventCount = 0;
+                int totalEventCountForList = 0;
 
                 while (true) {
                     System.out.println("---------------------------------");
@@ -63,7 +62,7 @@ public class GoFundMeClient {
                             out.writeUTF("LIST_EVENTS");
                         
                             List<String> pastEventsOutput = new ArrayList<>();
-                            int totalEventCountForList = in.readInt();
+                            totalEventCountForList = in.readInt();
                             
                             System.out.println("Current Fundraising Events:");
                             for (int i = 1; i <= totalEventCountForList; i++) {
@@ -90,44 +89,36 @@ public class GoFundMeClient {
                             }
                             break;
                         
-
-                        case 3:
+                            case 3:
                             System.out.println("---------------------------------");
-                            int totalEventCountForDonate = currentEventCount + pastEventCount;
-                            int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1,
-                                    totalEventCountForDonate) - 1;
-
-                            System.out.println("Enter donation amount:");
-                            double donationAmount = scanner.nextDouble();
-                            scanner.nextLine(); // Consume the newline character
-
+                            int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList) - 1; // Use the totalEventCountForList
+                            double donationAmount = getDoubleInput(scanner, "Enter donation amount: ", 0);
+                        
                             out.writeUTF("DONATE");
                             out.writeInt(eventIndexForDonate);
                             out.writeDouble(donationAmount);
-
+                        
                             String responseForDonate = in.readUTF();
                             System.out.println(responseForDonate);
                             break;
-
+                        
                         case 4:
                             System.out.println("---------------------------------");
-                            int totalEventCount = currentEventCount + pastEventCount;
-
-                            int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCount) - 1;
-
+                            int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList) - 1; // Use the totalEventCountForList
+                        
                             out.writeUTF("CHECK_DETAILS");
                             out.writeInt(eventIndex4);
-
-                            String name = in.readUTF();
+                        
+                            String checkEventName = in.readUTF();  // Renamed to avoid conflict
                             double checkTargetAmount = in.readDouble();
                             double checkCurrentAmount = in.readDouble();
                             Date checkDeadline = new Date(in.readLong());
                             System.out.printf(
                                     "Event Details:\nName: %s\nTarget Amount: $%.2f\nAmount Raised: $%.2f\nDeadline: %s\n",
-                                    name, checkTargetAmount, checkCurrentAmount,
+                                    checkEventName, checkTargetAmount, checkCurrentAmount,
                                     new SimpleDateFormat("MM-dd-yyyy").format(checkDeadline));
                             break;
-
+                        
                         case 5:
                             System.out.println("Exiting...");
                             return;

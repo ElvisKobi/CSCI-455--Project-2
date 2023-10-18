@@ -19,6 +19,12 @@ public class GoFundMeServer {
     private static final int PORT = 12345;
     private static List<FundraisingEvent> events = new ArrayList<>();
 
+    /**
+     * This method is the main method of the GoFundMeServer class. It starts the server and listens on a specific port for incoming client connections.
+     * For each incoming client connection, it creates a new ClientHandler thread to handle the client's requests.
+     *
+     * @param args an array of command-line arguments for the server
+     */
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server started. Listening on port " + PORT);
@@ -60,13 +66,12 @@ public class GoFundMeServer {
     }
 
     /**
-     * This class represents a client handler for the GoFundMe server. It
-     * initializes the input and output streams for the socket connection.
-     * The class contains methods to handle incoming requests from clients,
-     * including creating a new fundraising event, listing all current and past
-     * events, and processing donations.
-     * The class ensures thread safety by using synchronized blocks when accessing
-     * the events list.
+     * This class represents a client handler thread that handles requests from clients.
+     * It reads the request type from the input stream and calls the corresponding method to handle the request.
+     * The class contains methods to create a new fundraising event, list all existing events, process donations,
+     * and check the details of a specific event.
+     * The methods are synchronized to ensure thread safety when accessing the shared events list.
+     * The class also contains a constructor that initializes the input and output streams for the client socket.
      */
     private static class ClientHandler extends Thread {
         private Socket socket;
@@ -74,9 +79,7 @@ public class GoFundMeServer {
         private DataOutputStream out;
 
         /**
-         * This class represents a client handler for the GoFundMe server. It
-         * initializes the input and output streams for the socket connection.
-         *
+         * This class represents a client handler for the GoFundMe server. It initializes the input and output streams for the socket connection and prints a message to the console when a new client connects.
          * @param socket the socket connection to the client
          */
         public ClientHandler(Socket socket) {
@@ -84,49 +87,52 @@ public class GoFundMeServer {
             try {
                 in = new DataInputStream(socket.getInputStream());
                 out = new DataOutputStream(socket.getOutputStream());
+                System.out.println("New client connected: IP = " + socket.getInetAddress().getHostAddress()
+                        + ", Port = " + socket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
         /**
-         * This method runs the server and listens for incoming requests from clients.
-         * It reads the request type from the input stream and calls the appropriate
-         * method based on the request type.
-         * The server keeps the connection open until the client disconnects.
-         * If an invalid request type is received, it sends an error message to the
-         * client.
-         * If the client disconnects, it catches the EOFException and prints a message
-         * to the console.
-         * If any other IOException occurs, it prints the stack trace.
-         * Finally, it closes the socket.
+         * This method runs the server thread. It listens for incoming requests from clients and processes them accordingly.
+         * The method reads the request type from the input stream and uses a switch statement to determine which method to call
+         * to process the request. The method catches EOFException and IOException and prints the stack trace. Finally, it closes
+         * the socket.
          */
         @Override
         public void run() {
             try {
-                while (true) { // Keep the connection open until the client disconnects
+                while (true) {
                     String requestType = in.readUTF();
+                    System.out.println("Received request: " + requestType + " from IP = "
+                            + socket.getInetAddress().getHostAddress());
 
                     switch (requestType) {
                         case "CREATE_EVENT":
                             createEvent();
+                            System.out.println("Event created. Responded to client.");
                             break;
                         case "LIST_EVENTS":
                             listEvents();
+                            System.out.println("Listed events. Responded to client.");
                             break;
                         case "DONATE":
                             donate();
+                            System.out.println("Donation processed. Responded to client.");
                             break;
                         case "CHECK_DETAILS":
                             checkDetails();
+                            System.out.println("Checked details. Responded to client.");
                             break;
                         default:
                             out.writeUTF("Invalid request type.");
+                            System.out.println("Invalid request. Responded to client.");
                     }
                 }
             } catch (EOFException eof) {
-                // This exception is thrown when the client disconnects
-                System.out.println("Client disconnected.");
+                System.out.println("Client disconnected: IP = " + socket.getInetAddress().getHostAddress() + ", Port = "
+                        + socket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

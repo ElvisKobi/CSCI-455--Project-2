@@ -21,6 +21,22 @@ public class GoFundMeClient {
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 12345;
 
+    /**
+     * This class represents a client for the GoFundMe fundraising platform. It
+     * allows users to create new fundraising events, list existing events, donate
+     * to events, and check event details. The client communicates with a server
+     * using sockets and sends/receives data using DataInputStream and
+     * DataOutputStream. The user interface is implemented using a Scanner object to
+     * read user input from the console.
+     * 
+     * The main method contains a loop that allows for reconnect attempts in case
+     * the connection to the server is lost. Within the loop, the user is presented
+     * with a menu of options to choose from. The user's choice is sent to the
+     * server, which responds with the appropriate data or confirmation message.
+     * 
+     * The getIntInput, getStringInput, and getDateInput methods are helper methods
+     * that validate user input and ensure that it is of the correct type/format.
+     */
     public static void main(String[] args) throws InterruptedException {
         while (true) { // Loop to allow for reconnect attempts
             try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
@@ -57,13 +73,13 @@ public class GoFundMeClient {
                             System.out.println(response);
                             break;
 
-                            case 2:
+                        case 2:
                             System.out.println("---------------------------------");
                             out.writeUTF("LIST_EVENTS");
-                        
+
                             List<String> pastEventsOutput = new ArrayList<>();
                             totalEventCountForList = in.readInt();
-                            
+
                             System.out.println("Current Fundraising Events:");
                             for (int i = 1; i <= totalEventCountForList; i++) {
                                 boolean isCurrent = in.readBoolean();
@@ -71,45 +87,47 @@ public class GoFundMeClient {
                                 double eventTargetAmount = in.readDouble();
                                 double eventCurrentAmount = in.readDouble();
                                 Date eventDeadline = new Date(in.readLong());
-                        
+
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
                                         i, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
-                                
+
                                 if (isCurrent) {
                                     System.out.print(output);
                                 } else {
                                     pastEventsOutput.add(output);
                                 }
                             }
-                            
+
                             System.out.println("\nPast Fundraising Events:");
                             for (String pastEvent : pastEventsOutput) {
                                 System.out.print(pastEvent);
                             }
                             break;
-                        
-                            case 3:
+
+                        case 3:
                             System.out.println("---------------------------------");
-                            int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList) - 1; // Use the totalEventCountForList
+                            int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1,
+                                    totalEventCountForList) - 1; // Use the totalEventCountForList
                             double donationAmount = getDoubleInput(scanner, "Enter donation amount: ", 0);
-                        
+
                             out.writeUTF("DONATE");
                             out.writeInt(eventIndexForDonate);
                             out.writeDouble(donationAmount);
-                        
+
                             String responseForDonate = in.readUTF();
                             System.out.println(responseForDonate);
                             break;
-                        
+
                         case 4:
                             System.out.println("---------------------------------");
-                            int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList) - 1; // Use the totalEventCountForList
-                        
+                            int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList)
+                                    - 1; // Use the totalEventCountForList
+
                             out.writeUTF("CHECK_DETAILS");
                             out.writeInt(eventIndex4);
-                        
-                            String checkEventName = in.readUTF();  // Renamed to avoid conflict
+
+                            String checkEventName = in.readUTF(); // Renamed to avoid conflict
                             double checkTargetAmount = in.readDouble();
                             double checkCurrentAmount = in.readDouble();
                             Date checkDeadline = new Date(in.readLong());
@@ -118,7 +136,7 @@ public class GoFundMeClient {
                                     checkEventName, checkTargetAmount, checkCurrentAmount,
                                     new SimpleDateFormat("MM-dd-yyyy").format(checkDeadline));
                             break;
-                        
+
                         case 5:
                             System.out.println("Exiting...");
                             return;

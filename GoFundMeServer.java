@@ -158,44 +158,16 @@ public class GoFundMeServer {
             out.writeUTF("Event created successfully.");
         }
 
-        /**
-         * Lists the current and past fundraising events, sorted by their deadlines
-         * within their categories.
-         * The events are sent to the output stream in the following format:
-         * - For each current event: name, target amount, current amount, deadline
-         * - For each past event: name, target amount, current amount, deadline
-         * 
-         * @throws IOException if an I/O error occurs
-         */
         private void listEvents() throws IOException {
-            List<FundraisingEvent> currentEvents = new ArrayList<>();
-            List<FundraisingEvent> pastEvents = new ArrayList<>();
-
             Date now = new Date();
+            List<FundraisingEvent> allEvents;
             synchronized (events) {
-                for (FundraisingEvent event : events) {
-                    if (event.deadline.after(now)) {
-                        currentEvents.add(event);
-                    } else {
-                        pastEvents.add(event);
-                    }
-                }
+                allEvents = new ArrayList<>(events);
             }
 
-            // Sorting events by their deadlines within their categories
-            currentEvents.sort(Comparator.comparing(event -> event.deadline));
-            pastEvents.sort(Comparator.comparing(event -> event.deadline));
-
-            out.writeInt(currentEvents.size());
-            for (FundraisingEvent event : currentEvents) {
-                out.writeUTF(event.name);
-                out.writeDouble(event.targetAmount);
-                out.writeDouble(event.currentAmount);
-                out.writeLong(event.deadline.getTime());
-            }
-
-            out.writeInt(pastEvents.size());
-            for (FundraisingEvent event : pastEvents) {
+            out.writeInt(allEvents.size());
+            for (FundraisingEvent event : allEvents) {
+                out.writeBoolean(event.deadline.after(now));
                 out.writeUTF(event.name);
                 out.writeDouble(event.targetAmount);
                 out.writeDouble(event.currentAmount);

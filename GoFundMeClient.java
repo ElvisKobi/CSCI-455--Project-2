@@ -58,36 +58,38 @@ public class GoFundMeClient {
                             System.out.println(response);
                             break;
 
-                        case 2:
+                            case 2:
                             System.out.println("---------------------------------");
                             out.writeUTF("LIST_EVENTS");
-
-                            int overallIndex = 1; // Initialize a running index
-
-                            currentEventCount = in.readInt();
+                        
+                            List<String> pastEventsOutput = new ArrayList<>();
+                            int totalEventCountForList = in.readInt();
+                            
                             System.out.println("Current Fundraising Events:");
-                            for (int i = 0; i < currentEventCount; i++) {
-                                String name = in.readUTF();
-                                double currentTargetAmount = in.readDouble();
-                                double currentAmount = in.readDouble();
-                                Date currentDeadline = new Date(in.readLong());
-                                System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        overallIndex++, name, currentTargetAmount, currentAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(currentDeadline));
+                            for (int i = 1; i <= totalEventCountForList; i++) {
+                                boolean isCurrent = in.readBoolean();
+                                eventName = in.readUTF();
+                                double eventTargetAmount = in.readDouble();
+                                double eventCurrentAmount = in.readDouble();
+                                Date eventDeadline = new Date(in.readLong());
+                        
+                                String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
+                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
+                                
+                                if (isCurrent) {
+                                    System.out.print(output);
+                                } else {
+                                    pastEventsOutput.add(output);
+                                }
                             }
-
-                            pastEventCount = in.readInt();
+                            
                             System.out.println("\nPast Fundraising Events:");
-                            for (int i = 0; i < pastEventCount; i++) {
-                                String name = in.readUTF();
-                                double pastTargetAmount = in.readDouble();
-                                double pastAmount = in.readDouble();
-                                Date pastDeadline = new Date(in.readLong());
-                                System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        overallIndex++, name, pastTargetAmount, pastAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(pastDeadline));
+                            for (String pastEvent : pastEventsOutput) {
+                                System.out.print(pastEvent);
                             }
                             break;
+                        
 
                         case 3:
                             System.out.println("---------------------------------");

@@ -28,6 +28,9 @@ public class GoFundMeClient {
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                     Scanner scanner = new Scanner(System.in)) {
 
+                int currentEventCount = 0;
+                int pastEventCount = 0;
+
                 while (true) {
                     System.out.println("---------------------------------");
                     System.out.println("Choose an option:");
@@ -59,63 +62,68 @@ public class GoFundMeClient {
                             System.out.println("---------------------------------");
                             out.writeUTF("LIST_EVENTS");
 
-                            int currentEventCount = in.readInt();
+                            int overallIndex = 1; // Initialize a running index
+
+                            currentEventCount = in.readInt();
                             System.out.println("Current Fundraising Events:");
                             for (int i = 0; i < currentEventCount; i++) {
                                 String name = in.readUTF();
-                                targetAmount = in.readDouble();
+                                double currentTargetAmount = in.readDouble();
                                 double currentAmount = in.readDouble();
-                                deadline = new Date(in.readLong());
+                                Date currentDeadline = new Date(in.readLong());
                                 System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i + 1, name, targetAmount, currentAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(deadline));
+                                        overallIndex++, name, currentTargetAmount, currentAmount,
+                                        new SimpleDateFormat("MM-dd-yyyy").format(currentDeadline));
                             }
 
-                            int pastEventCount = in.readInt();
+                            pastEventCount = in.readInt();
                             System.out.println("\nPast Fundraising Events:");
                             for (int i = 0; i < pastEventCount; i++) {
                                 String name = in.readUTF();
-                                targetAmount = in.readDouble();
-                                double currentAmount = in.readDouble();
-                                deadline = new Date(in.readLong());
+                                double pastTargetAmount = in.readDouble();
+                                double pastAmount = in.readDouble();
+                                Date pastDeadline = new Date(in.readLong());
                                 System.out.printf("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i + 1, name, targetAmount, currentAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(deadline));
+                                        overallIndex++, name, pastTargetAmount, pastAmount,
+                                        new SimpleDateFormat("MM-dd-yyyy").format(pastDeadline));
                             }
                             break;
 
                         case 3:
                             System.out.println("---------------------------------");
-                            System.out.println("Enter event index:");
-                            int eventIndex = scanner.nextInt() - 1;
+                            int totalEventCountForDonate = currentEventCount + pastEventCount;
+                            int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1,
+                                    totalEventCountForDonate) - 1;
 
                             System.out.println("Enter donation amount:");
                             double donationAmount = scanner.nextDouble();
+                            scanner.nextLine(); // Consume the newline character
 
                             out.writeUTF("DONATE");
-                            out.writeInt(eventIndex);
+                            out.writeInt(eventIndexForDonate);
                             out.writeDouble(donationAmount);
 
-                            response = in.readUTF();
-                            System.out.println(response);
+                            String responseForDonate = in.readUTF();
+                            System.out.println(responseForDonate);
                             break;
 
                         case 4:
                             System.out.println("---------------------------------");
-                            System.out.println("Enter event index:");
-                            eventIndex = scanner.nextInt() - 1;
+                            int totalEventCount = currentEventCount + pastEventCount;
+
+                            int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCount) - 1;
 
                             out.writeUTF("CHECK_DETAILS");
-                            out.writeInt(eventIndex);
+                            out.writeInt(eventIndex4);
 
                             String name = in.readUTF();
-                            targetAmount = in.readDouble();
-                            double currentAmount = in.readDouble();
-                            deadline = new Date(in.readLong());
+                            double checkTargetAmount = in.readDouble();
+                            double checkCurrentAmount = in.readDouble();
+                            Date checkDeadline = new Date(in.readLong());
                             System.out.printf(
                                     "Event Details:\nName: %s\nTarget Amount: $%.2f\nAmount Raised: $%.2f\nDeadline: %s\n",
-                                    name, targetAmount, currentAmount,
-                                    new SimpleDateFormat("MM-dd-yyyy").format(deadline));
+                                    name, checkTargetAmount, checkCurrentAmount,
+                                    new SimpleDateFormat("MM-dd-yyyy").format(checkDeadline));
                             break;
 
                         case 5:

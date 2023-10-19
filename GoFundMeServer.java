@@ -27,8 +27,9 @@ public class GoFundMeServer {
      */
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("---------------------------------");
             System.out.println("Server started. Listening on port " + PORT);
-
+            
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 new ClientHandler(clientSocket).start();
@@ -87,7 +88,9 @@ public class GoFundMeServer {
             try {
                 in = new DataInputStream(socket.getInputStream());
                 out = new DataOutputStream(socket.getOutputStream());
-                System.out.println("New client connected: IP = " + socket.getInetAddress().getHostAddress()
+                // Log current time
+            Date now = new Date();
+                System.out.println(now + ": New client connected: IP = " + socket.getInetAddress().getHostAddress()
                         + ", Port = " + socket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -131,7 +134,9 @@ public class GoFundMeServer {
                     }
                 }
             } catch (EOFException eof) {
-                System.out.println("Client disconnected: IP = " + socket.getInetAddress().getHostAddress() + ", Port = "
+                // Log current time
+            Date now = new Date();
+                System.out.println(now + ": Client disconnected: IP = " + socket.getInetAddress().getHostAddress() + ", Port = "
                         + socket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();

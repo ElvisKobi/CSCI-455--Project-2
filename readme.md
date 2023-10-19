@@ -12,8 +12,6 @@ This application simulates a simple GoFundMe platform where users can create fun
     - [Server](#server)
       - [Starting the Server](#starting-the-server)
       - [Client Connection](#client-connection)
-      - [Receiving Requests](#receiving-requests)
-      - [Processing Requests](#processing-requests)
       - [Client Disconnection](#client-disconnection)
     - [Client](#client)
       - [1. Create a new fundraising event](#1-create-a-new-fundraising-event)
@@ -53,11 +51,10 @@ javac GoFundMeServer.java GoFundMeClient.java
 
 ## Usage
 
-
 ### Server
 
 #### Starting the Server
-When the server starts, you'll see:
+When server starts:
 ```
 Server started. Listening on port [PORT_NUMBER]
 ```
@@ -65,27 +62,14 @@ Server started. Listening on port [PORT_NUMBER]
 #### Client Connection
 When a new client connects:
 ```
-[TIME]: New client connected: IP = [CLIENT_IP_ADDRESS]
-```
-
-#### Receiving Requests
-Upon receiving a client request:
-```
-Received request: [REQUEST_TYPE] from IP = [CLIENT_IP_ADDRESS]
-```
-
-#### Processing Requests
-After processing each request, specific outputs are shown, like:
-```
-Event created. Responded to client.
+[TIME]: New client connected: IP = [CLIENT_IP_ADDRESS], Port = [CLIENT_PORT]
 ```
 
 #### Client Disconnection
 When a client disconnects:
 ```
-[TIME]: Client disconnected: IP = [CLIENT_IP_ADDRESS]
+[TIME]: Client disconnected: IP = [CLIENT_IP_ADDRESS], Port = [CLIENT_PORT]
 ```
-
 
 ### Client
 

@@ -20,8 +20,10 @@ public class GoFundMeServer {
     private static List<FundraisingEvent> events = new ArrayList<>();
 
     /**
-     * This method is the main method of the GoFundMeServer class. It starts the server and listens on a specific port for incoming client connections.
-     * For each incoming client connection, it creates a new ClientHandler thread to handle the client's requests.
+     * This method is the main method of the GoFundMeServer class. It starts the
+     * server and listens on a specific port for incoming client connections.
+     * For each incoming client connection, it creates a new ClientHandler thread to
+     * handle the client's requests.
      *
      * @param args an array of command-line arguments for the server
      */
@@ -29,7 +31,7 @@ public class GoFundMeServer {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("---------------------------------");
             System.out.println("Server started. Listening on port " + PORT);
-            
+
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 new ClientHandler(clientSocket).start();
@@ -67,12 +69,17 @@ public class GoFundMeServer {
     }
 
     /**
-     * This class represents a client handler thread that handles requests from clients.
-     * It reads the request type from the input stream and calls the corresponding method to handle the request.
-     * The class contains methods to create a new fundraising event, list all existing events, process donations,
+     * This class represents a client handler thread that handles requests from
+     * clients.
+     * It reads the request type from the input stream and calls the corresponding
+     * method to handle the request.
+     * The class contains methods to create a new fundraising event, list all
+     * existing events, process donations,
      * and check the details of a specific event.
-     * The methods are synchronized to ensure thread safety when accessing the shared events list.
-     * The class also contains a constructor that initializes the input and output streams for the client socket.
+     * The methods are synchronized to ensure thread safety when accessing the
+     * shared events list.
+     * The class also contains a constructor that initializes the input and output
+     * streams for the client socket.
      */
     private static class ClientHandler extends Thread {
         private Socket socket;
@@ -80,7 +87,10 @@ public class GoFundMeServer {
         private DataOutputStream out;
 
         /**
-         * This class represents a client handler for the GoFundMe server. It initializes the input and output streams for the socket connection and prints a message to the console when a new client connects.
+         * This class represents a client handler for the GoFundMe server. It
+         * initializes the input and output streams for the socket connection and prints
+         * a message to the console when a new client connects.
+         * 
          * @param socket the socket connection to the client
          */
         public ClientHandler(Socket socket) {
@@ -89,7 +99,7 @@ public class GoFundMeServer {
                 in = new DataInputStream(socket.getInputStream());
                 out = new DataOutputStream(socket.getOutputStream());
                 // Log current time
-            Date now = new Date();
+                Date now = new Date();
                 System.out.println(now + ": New client connected: IP = " + socket.getInetAddress().getHostAddress()
                         + ", Port = " + socket.getPort());
             } catch (IOException e) {
@@ -98,9 +108,12 @@ public class GoFundMeServer {
         }
 
         /**
-         * This method runs the server thread. It listens for incoming requests from clients and processes them accordingly.
-         * The method reads the request type from the input stream and uses a switch statement to determine which method to call
-         * to process the request. The method catches EOFException and IOException and prints the stack trace. Finally, it closes
+         * This method runs the server thread. It listens for incoming requests from
+         * clients and processes them accordingly.
+         * The method reads the request type from the input stream and uses a switch
+         * statement to determine which method to call
+         * to process the request. The method catches EOFException and IOException and
+         * prints the stack trace. Finally, it closes
          * the socket.
          */
         @Override
@@ -135,9 +148,10 @@ public class GoFundMeServer {
                 }
             } catch (EOFException eof) {
                 // Log current time
-            Date now = new Date();
-                System.out.println(now + ": Client disconnected: IP = " + socket.getInetAddress().getHostAddress() + ", Port = "
-                        + socket.getPort());
+                Date now = new Date();
+                System.out.println(
+                        now + ": Client disconnected: IP = " + socket.getInetAddress().getHostAddress() + ", Port = "
+                                + socket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

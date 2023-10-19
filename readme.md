@@ -10,7 +10,18 @@ This application simulates a simple GoFundMe platform where users can create fun
     - [Installation](#installation)
   - [Usage](#usage)
     - [Server](#server)
+      - [Starting the Server](#starting-the-server)
+      - [Client Connection](#client-connection)
+      - [Receiving Requests](#receiving-requests)
+      - [Processing Requests](#processing-requests)
+      - [Client Disconnection](#client-disconnection)
     - [Client](#client)
+      - [1. Create a new fundraising event](#1-create-a-new-fundraising-event)
+      - [2. List fundraising events](#2-list-fundraising-events)
+      - [3. Donate to an event](#3-donate-to-an-event)
+      - [4. Check event details](#4-check-event-details)
+      - [5. Exit](#5-exit)
+  - [Communication](#communication)
   - [Features](#features)
   - [Troubleshooting](#troubleshooting)
   - [Contributors](#contributors)
@@ -42,37 +53,95 @@ javac GoFundMeServer.java GoFundMeClient.java
 
 ## Usage
 
+
 ### Server
 
-To start the server, execute:
-```bash
-java GoFundMeServer
+#### Starting the Server
+When the server starts, you'll see:
 ```
-The server will initiate and await client connections.
+Server started. Listening on port [PORT_NUMBER]
+```
+
+#### Client Connection
+When a new client connects:
+```
+[TIME]: New client connected: IP = [CLIENT_IP_ADDRESS]
+```
+
+#### Receiving Requests
+Upon receiving a client request:
+```
+Received request: [REQUEST_TYPE] from IP = [CLIENT_IP_ADDRESS]
+```
+
+#### Processing Requests
+After processing each request, specific outputs are shown, like:
+```
+Event created. Responded to client.
+```
+
+#### Client Disconnection
+When a client disconnects:
+```
+[TIME]: Client disconnected: IP = [CLIENT_IP_ADDRESS]
+```
+
 
 ### Client
 
-To kick off a client instance:
-```bash
-java GoFundMeClient
+When the client starts, a main menu displays:
 ```
-Follow the on-screen instructions to engage with the application.
+Choose an option:
+1. Create a new fundraising event
+2. List fundraising events
+3. Donate to an event
+4. Check event details
+5. Exit
+```
+
+#### 1. Create a new fundraising event
+You'll be prompted to input:
+- Event name
+- Target amount
+- Deadline
+
+After entering these, the event is created and you go back to the main menu.
+
+#### 2. List fundraising events
+Choosing this shows a list of all ongoing and past events. Each event has an index, and details like the name, target amount, and deadline are shown. You then return to the main menu.
+
+#### 3. Donate to an event
+You'll be asked to:
+- Enter the index of the event to donate to
+- Specify the donation amount
+
+Once the donation is done, a confirmation shows and you go back to the main menu.
+
+#### 4. Check event details
+You'll need to:
+- Enter the index of the event to check
+
+The client shows detailed info like the name, amount raised, and deadline. You then go back to the main menu.
+
+#### 5. Exit
+This option closes the client.
+
+## Communication
+The client and server communicate through Java sockets. Data is sent and received using DataInputStream and DataOutputStream.
 
 ## Features
 
-- **Create Event**: Users can establish a new fundraising event by detailing the event name, target amount, and deadline.
-- **List Events**: Presents a list of ongoing and previous fundraising events.
-- **Donate**: Users can contribute to an existing event by selecting the event index and indicating the donation sum.
-- **Check Event Details**: Showcases in-depth info about a chosen event.
+- **Create Event**: Users can set up a new fundraising event by giving the event name, target amount, and deadline.
+- **List Events**: Shows a list of ongoing and past fundraising events.
+- **Donate**: Users can give to an existing event by picking the event index and stating the donation amount.
+- **Check Event Details**: Gives detailed info about a chosen event.
 
 ## Troubleshooting
 
-- **Server Address Already in Use**: This error signifies the server port is currently occupied. Ensure no other instances of the server are active, or consider altering the port number in the source code.
-  
-- **Connection Refused on Client**: Confirm the server is operational and tuning in on the appropriate port.
+- **Server Address Already in Use**: This error means the server port is in use. Make sure no other server instances are active, or think about changing the port number in the source code.
+- **Connection Refused on Client**: Make sure the server is running and listening on the right port.
 
 ## Contributors
 
 - [Christopher Robinson](<https://github.com/Christopher-C-Robinson>)
 - [Elvis Acheampong](<https://github.com/ElvisKobi>)
-

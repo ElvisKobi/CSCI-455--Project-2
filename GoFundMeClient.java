@@ -106,6 +106,31 @@ public class GoFundMeClient {
                             break;
 
                         case 3:
+                            // Case 2 in background
+                            out.writeUTF("LIST_EVENTS");
+
+                            pastEventsOutput = new ArrayList<>();
+                            totalEventCountForList = in.readInt();
+
+                            for (int i = 1; i <= totalEventCountForList; i++) {
+                                boolean isCurrent = in.readBoolean();
+                                eventName = in.readUTF();
+                                double eventTargetAmount = in.readDouble();
+                                double eventCurrentAmount = in.readDouble();
+                                Date eventDeadline = new Date(in.readLong());
+
+                                String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
+                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
+
+                                if (isCurrent) {
+                                    continue;
+                                } else {
+                                    pastEventsOutput.add(output);
+                                }
+                            }
+
+                            // Case 3
                             System.out.println("---------------------------------");
                             int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1,
                                     totalEventCountForList) - 1; // Use the totalEventCountForList
@@ -120,6 +145,32 @@ public class GoFundMeClient {
                             break;
 
                         case 4:
+                            // Case 2 in background
+                            out.writeUTF("LIST_EVENTS");
+
+                            pastEventsOutput = new ArrayList<>();
+                            totalEventCountForList = in.readInt();
+
+                            System.out.println("Current Fundraising Events:");
+                            for (int i = 1; i <= totalEventCountForList; i++) {
+                                boolean isCurrent = in.readBoolean();
+                                eventName = in.readUTF();
+                                double eventTargetAmount = in.readDouble();
+                                double eventCurrentAmount = in.readDouble();
+                                Date eventDeadline = new Date(in.readLong());
+
+                                String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
+                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
+
+                                if (isCurrent) {
+                                    continue;
+                                } else {
+                                    pastEventsOutput.add(output);
+                                }
+                            }
+
+                            // Case 4
                             System.out.println("---------------------------------");
                             int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList)
                                     - 1; // Use the totalEventCountForList

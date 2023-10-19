@@ -71,9 +71,16 @@ public class GoFundMeClient {
 
                             String response = in.readUTF();
                             System.out.println(response);
+                            totalEventCountForList++;  // Total event increment
                             break;
 
                         case 2:
+                            // Check for created events
+                            if (totalEventCountForList==0) {
+                                System.out.println("No Event Available. Please create an event first!");
+                                break;
+                            }
+
                             System.out.println("---------------------------------");
                             out.writeUTF("LIST_EVENTS");
 
@@ -106,6 +113,12 @@ public class GoFundMeClient {
                             break;
 
                         case 3:
+                        // Check for created events
+                        if (totalEventCountForList==0) {
+                                System.out.println("No Event Available. Please create an event first!");
+                                break;
+                            }
+
                             // Case 2 in background
                             out.writeUTF("LIST_EVENTS");
 
@@ -145,6 +158,12 @@ public class GoFundMeClient {
                             break;
 
                         case 4:
+                        // Check for created events
+                        if (totalEventCountForList==0) {
+                                System.out.println("No Event Available. Please create an event first!");
+                                break;
+                            }
+                            
                             // Case 2 in background
                             out.writeUTF("LIST_EVENTS");
 

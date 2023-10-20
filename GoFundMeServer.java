@@ -108,13 +108,13 @@ public class GoFundMeServer {
         }
 
         /**
-         * This method runs the server thread. It listens for incoming requests from
-         * clients and processes them accordingly.
-         * The method reads the request type from the input stream and uses a switch
-         * statement to determine which method to call
-         * to process the request. The method catches EOFException and IOException and
-         * prints the stack trace. Finally, it closes
-         * the socket.
+         * This method overrides the run method of the Thread class. It listens for
+         * incoming requests from the client and processes them accordingly.
+         * The method reads the request type from the input stream and switches on the
+         * request type to call the appropriate method to handle the request.
+         * The method catches SocketException, EOFException, and IOException and prints
+         * the appropriate message to the console.
+         * Finally, it closes the socket connection.
          */
         @Override
         public void run() {
@@ -122,7 +122,7 @@ public class GoFundMeServer {
                 while (true) {
                     String requestType = in.readUTF();
                     System.out.println("Received request: " + requestType + " from IP = "
-                            + socket.getInetAddress().getHostAddress());
+                            + socket.getInetAddress().getHostAddress() + ", Port = " + socket.getPort());
 
                     switch (requestType) {
                         case "CREATE_EVENT":
@@ -146,8 +146,12 @@ public class GoFundMeServer {
                             System.out.println("Invalid request. Responded to client.");
                     }
                 }
+            } catch (SocketException se) {
+                Date now = new Date();
+                System.out.println(
+                        now + ": Client disconnected abruptly: IP = " + socket.getInetAddress().getHostAddress()
+                                + ", Port = " + socket.getPort());
             } catch (EOFException eof) {
-                // Log current time
                 Date now = new Date();
                 System.out.println(
                         now + ": Client disconnected: IP = " + socket.getInetAddress().getHostAddress() + ", Port = "

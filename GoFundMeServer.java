@@ -36,6 +36,9 @@ public class GoFundMeServer {
                 Socket clientSocket = serverSocket.accept();
                 new ClientHandler(clientSocket).start();
             }
+        } catch (BindException e) {
+            System.err.println("---------------------------------");
+            System.err.println("Could not start the server. Port " + PORT + " is already in use.");
         } catch (IOException e) {
             e.printStackTrace();
         }

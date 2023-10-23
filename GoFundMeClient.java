@@ -75,17 +75,17 @@ public class GoFundMeClient {
                             break;
 
                         case 2:
+                            System.out.println("---------------------------------");
+                            out.writeUTF("LIST_EVENTS");
+                            totalEventCountForList = in.readInt();
+
                             // Check for created events
                             if (totalEventCountForList == 0) {
                                 System.out.println("No Event Available. Please create an event first!");
                                 break;
                             }
 
-                            System.out.println("---------------------------------");
-                            out.writeUTF("LIST_EVENTS");
-
                             List<String> pastEventsOutput = new ArrayList<>();
-                            totalEventCountForList = in.readInt();
 
                             System.out.println("Current Fundraising Events:");
                             for (int i = 1; i <= totalEventCountForList; i++) {
@@ -113,17 +113,17 @@ public class GoFundMeClient {
                             break;
 
                         case 3:
+                            // Case 2 in background
+                            out.writeUTF("LIST_EVENTS");
+                            totalEventCountForList = in.readInt();
+
                             // Check for created events
                             if (totalEventCountForList == 0) {
                                 System.out.println("No Event Available. Please create an event first!");
                                 break;
                             }
 
-                            // Case 2 in background
-                            out.writeUTF("LIST_EVENTS");
-
                             pastEventsOutput = new ArrayList<>();
-                            totalEventCountForList = in.readInt();
 
                             for (int i = 1; i <= totalEventCountForList; i++) {
                                 boolean isCurrent = in.readBoolean();
@@ -158,19 +158,18 @@ public class GoFundMeClient {
                             break;
 
                         case 4:
+                            // Case 2 in background
+                            out.writeUTF("LIST_EVENTS");
+                            totalEventCountForList = in.readInt();
+
                             // Check for created events
                             if (totalEventCountForList == 0) {
                                 System.out.println("No Event Available. Please create an event first!");
                                 break;
                             }
 
-                            // Case 2 in background
-                            out.writeUTF("LIST_EVENTS");
-
                             pastEventsOutput = new ArrayList<>();
-                            totalEventCountForList = in.readInt();
 
-                            System.out.println("Current Fundraising Events:");
                             for (int i = 1; i <= totalEventCountForList; i++) {
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
@@ -324,7 +323,12 @@ public class GoFundMeClient {
                     break;
                 }
             }
-            System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+            // case where min and max are the same
+            if (min == max) {
+                System.out.println("Invalid input. Please enter " + min + ".");
+            } else {
+                System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+            }
             scanner.nextLine(); // Clear the invalid input
         }
         scanner.nextLine(); // Consume the newline character

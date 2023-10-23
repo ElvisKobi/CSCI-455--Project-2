@@ -187,6 +187,10 @@ public class GoFundMeServer {
             out.writeUTF("Event created successfully.");
         }
 
+        /**
+         * Sends a list of all fundraising events to the client.
+         * @throws IOException if an I/O error occurs
+         */
         private void listEvents() throws IOException {
             Date now = new Date();
             List<FundraisingEvent> allEvents;

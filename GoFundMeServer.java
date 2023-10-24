@@ -3,16 +3,13 @@ import java.net.*;
 import java.util.*;
 
 /**
- * This class represents a server for a GoFundMe-like application. It listens
- * for incoming client connections and handles requests from clients.
- * The server maintains a list of fundraising events and ensures thread safety
- * when accessing the list.
- * The server can create new fundraising events, list all current and past
- * events, and process donations.
- * The server uses a nested class, FundraisingEvent, to represent a fundraising
- * event with a name, target amount, deadline, and current amount raised.
- * The server uses a nested class, ClientHandler, to handle incoming requests
- * from clients and ensure thread safety when accessing the events list.
+ * This class represents a server for the GoFundMe application.
+ * It listens for incoming client connections and creates a new ClientHandler
+ * thread for each client connection.
+ * It also contains a nested FundraisingEvent class that represents a
+ * fundraising
+ * event with a unique ID, name, target amount, deadline, and current amount
+ * raised.
  */
 public class GoFundMeServer {
 
@@ -20,12 +17,11 @@ public class GoFundMeServer {
     private static List<FundraisingEvent> events = new ArrayList<>();
 
     /**
-     * This method is the main method of the GoFundMeServer class. It starts the
-     * server and listens on a specific port for incoming client connections.
-     * For each incoming client connection, it creates a new ClientHandler thread to
-     * handle the client's requests.
-     *
-     * @param args an array of command-line arguments for the server
+     * This method starts the GoFundMe server and listens on a specified port for
+     * incoming client connections.
+     * It creates a new ClientHandler thread for each incoming client connection.
+     * 
+     * @param args command line arguments
      */
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -45,7 +41,7 @@ public class GoFundMeServer {
     }
 
     /**
-     * This class represents a fundraising event with a name, target amount,
+     * Represents a fundraising event with a unique ID, name, target amount,
      * deadline, and current amount raised.
      */
     private static class FundraisingEvent {
@@ -56,12 +52,10 @@ public class GoFundMeServer {
         double currentAmount;
 
         /**
-         * Constructs a new FundraisingEvent object with the given name, target amount,
-         * and deadline.
-         * The current amount raised is initialized to 0.
+         * Constructor for FundraisingEvent class.
          * 
          * @param name         the name of the fundraising event
-         * @param targetAmount the target amount to be raised
+         * @param targetAmount the target amount of money to be raised
          * @param deadline     the deadline for the fundraising event
          */
         public FundraisingEvent(String name, double targetAmount, Date deadline) {
@@ -74,17 +68,11 @@ public class GoFundMeServer {
     }
 
     /**
-     * This class represents a client handler thread that handles requests from
-     * clients.
-     * It reads the request type from the input stream and calls the corresponding
-     * method to handle the request.
-     * The class contains methods to create a new fundraising event, list all
-     * existing events, process donations,
-     * and check the details of a specific event.
-     * The methods are synchronized to ensure thread safety when accessing the
-     * shared events list.
-     * The class also contains a constructor that initializes the input and output
-     * streams for the client socket.
+     * This class represents a thread that handles incoming client connections.
+     * 
+     * @throws SocketException if there is an error with the socket connection
+     * @throws EOFException    if the end of the file is reached unexpectedly
+     * @throws IOException     if there is an error with the input/output streams
      */
     private static class ClientHandler extends Thread {
         private Socket socket;
@@ -92,11 +80,9 @@ public class GoFundMeServer {
         private DataOutputStream out;
 
         /**
-         * This class represents a client handler for the GoFundMe server. It
-         * initializes the input and output streams for the socket connection and prints
-         * a message to the console when a new client connects.
+         * Constructs a new ClientHandler object to handle incoming client connections.
          * 
-         * @param socket the socket connection to the client
+         * @param socket the socket object representing the client connection
          */
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -113,13 +99,14 @@ public class GoFundMeServer {
         }
 
         /**
-         * This method overrides the run method of the Thread class. It listens for
-         * incoming requests from the client and processes them accordingly.
-         * The method reads the request type from the input stream and switches on the
-         * request type to call the appropriate method to handle the request.
-         * The method catches SocketException, EOFException, and IOException and prints
-         * the appropriate message to the console.
-         * Finally, it closes the socket connection.
+         * This method runs the server and listens for incoming requests from clients.
+         * It reads the request type from the input stream and processes the request
+         * accordingly. It also catches any exceptions that may occur during the process
+         * and prints them to the console.
+         * 
+         * @throws SocketException if there is an error with the socket connection
+         * @throws EOFException    if the end of the file is reached unexpectedly
+         * @throws IOException     if there is an error with the input/output streams
          */
         @Override
         public void run() {
@@ -175,7 +162,10 @@ public class GoFundMeServer {
             }
         }
 
-        // sort events by deadline
+        /**
+         * Sorts the list of fundraising events by their deadlines in ascending order.
+         * Uses a synchronized block to ensure thread safety.
+         */
         private void sortEvents() {
             synchronized (events) {
                 Collections.sort(events, new Comparator<FundraisingEvent>() {
@@ -188,12 +178,9 @@ public class GoFundMeServer {
         }
 
         /**
-         * Reads the name, target amount, and deadline of a fundraising event from the
-         * input stream and creates a new FundraisingEvent object with the given
-         * information.
-         * The new event is added to the events list in a synchronized block to ensure
-         * thread safety.
-         * Sends a success message to the output stream after the event is created.
+         * Reads input from the client to create a new FundraisingEvent object and adds
+         * it to the events list.
+         * Sends a success message back to the client.
          * 
          * @throws IOException if there is an error reading from the input stream.
          */
@@ -208,9 +195,12 @@ public class GoFundMeServer {
         }
 
         /**
-         * Sends a list of all fundraising events to the client.
+         * Lists all fundraising events and their details, including id, name, target
+         * amount, current amount, and deadline.
+         * The events are sorted by their id in ascending order.
          * 
-         * @throws IOException if an I/O error occurs
+         * @throws IOException if an I/O error occurs while writing to the output
+         *                     stream.
          */
         private void listEvents() throws IOException {
             Date now = new Date();
@@ -231,27 +221,20 @@ public class GoFundMeServer {
         }
 
         /**
-         * This method handles the donation process. It reads the event index and
-         * donation amount from the input stream,
-         * checks if the event index is valid, adds the donation amount to the
-         * corresponding fundraising event's current amount,
-         * and writes a success message to the output stream. The method is synchronized
-         * to ensure thread safety when accessing
-         * the shared events list.
-         *
-         * @throws IOException if an I/O error occurs while reading from or writing to
-         *                     the input/output stream.
+         * Processes a donation for a fundraising event.
+         * 
+         * @throws IOException if an I/O error occurs
          */
         private void donate() throws IOException {
             int eventIndex = in.readInt();
             double donationAmount = in.readDouble();
-        
+
             synchronized (events) {
                 if (eventIndex < 0 || eventIndex >= events.size()) {
                     out.writeUTF("Invalid event index.");
                     return;
                 }
-        
+
                 FundraisingEvent selectedEvent = null;
                 // Find the event with the corresponding index
                 for (FundraisingEvent event : events) {
@@ -260,30 +243,24 @@ public class GoFundMeServer {
                         break;
                     }
                 }
-        
+
                 // If the event is null or has passed, send an error message
                 if (selectedEvent == null || selectedEvent.deadline.before(new Date())) {
                     out.writeUTF("Event not found or it has already ended.");
                     return;
                 }
-        
+
                 // Process the donation
                 selectedEvent.currentAmount += donationAmount;
             }
-        
+
             out.writeUTF("Donation successful. Thank you for your contribution!");
         }
-        
 
         /**
-         * Reads an integer from the input stream and uses it to retrieve a
-         * FundraisingEvent object from the events list.
-         * Then, writes the name, target amount, current amount, and deadline of the
-         * event to the output stream.
-         * If the event index is invalid, writes an error message to the output stream.
-         *
-         * @throws IOException if an I/O error occurs while reading from or writing to
-         *                     the streams.
+         * Checks the details of a fundraising event.
+         * 
+         * @throws IOException if an I/O error occurs
          */
         private void checkDetails() throws IOException {
             int eventIndex = in.readInt();
@@ -295,8 +272,8 @@ public class GoFundMeServer {
                 }
 
                 // Get event by id attribute
-                for(FundraisingEvent event : events) {
-                    if(event.id == eventIndex) {
+                for (FundraisingEvent event : events) {
+                    if (event.id == eventIndex) {
                         out.writeUTF(event.name);
                         out.writeDouble(event.targetAmount);
                         out.writeDouble(event.currentAmount);

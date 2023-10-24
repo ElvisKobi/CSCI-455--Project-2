@@ -5,16 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * This class represents a client for the GoFundMe application. It allows users
- * to create new fundraising events, list fundraising events, donate to an
- * event, check event details, and exit the application. The client communicates
- * with the server using sockets and sends/receives data using DataInputStream
- * and DataOutputStream.
- * The client prompts the user for input using Scanner and validates the input
- * before sending it to the server.
- * The client runs in an infinite loop to allow for reconnect attempts in case
- * the connection to the server is lost.
- * The server address and port are set as constants in the class.
+ * This class implements a client application that communicates with the
+ * GoFundMeServer to create fundraising events, list fundraising events, donate
+ * to fundraising events, and check fundraising event details.
  */
 public class GoFundMeClient {
 
@@ -22,20 +15,10 @@ public class GoFundMeClient {
     private static final int SERVER_PORT = 12345;
 
     /**
-     * This class represents a client for the GoFundMe fundraising platform. It
-     * allows users to create new fundraising events, list existing events, donate
-     * to events, and check event details. The client communicates with a server
-     * using sockets and sends/receives data using DataInputStream and
-     * DataOutputStream. The user interface is implemented using a Scanner object to
-     * read user input from the console.
+     * The main method of the client application.
      * 
-     * The main method contains a loop that allows for reconnect attempts in case
-     * the connection to the server is lost. Within the loop, the user is presented
-     * with a menu of options to choose from. The user's choice is sent to the
-     * server, which responds with the appropriate data or confirmation message.
-     * 
-     * The getIntInput, getStringInput, and getDateInput methods are helper methods
-     * that validate user input and ensure that it is of the correct type/format.
+     * @param args command line arguments
+     * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
         while (true) { // Loop to allow for reconnect attempts
@@ -89,6 +72,7 @@ public class GoFundMeClient {
 
                             System.out.println("Current Fundraising Events:");
                             for (int i = 1; i <= totalEventCountForList; i++) {
+                                int eventIndex = in.readInt();
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
                                 double eventTargetAmount = in.readDouble();
@@ -96,7 +80,7 @@ public class GoFundMeClient {
                                 Date eventDeadline = new Date(in.readLong());
 
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
 
                                 if (isCurrent) {
@@ -126,6 +110,7 @@ public class GoFundMeClient {
                             pastEventsOutput = new ArrayList<>();
 
                             for (int i = 1; i <= totalEventCountForList; i++) {
+                                int eventIndex = in.readInt();
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
                                 double eventTargetAmount = in.readDouble();
@@ -133,7 +118,7 @@ public class GoFundMeClient {
                                 Date eventDeadline = new Date(in.readLong());
 
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
 
                                 if (isCurrent) {
@@ -171,6 +156,7 @@ public class GoFundMeClient {
                             pastEventsOutput = new ArrayList<>();
 
                             for (int i = 1; i <= totalEventCountForList; i++) {
+                                int eventIndex = in.readInt();
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
                                 double eventTargetAmount = in.readDouble();
@@ -178,7 +164,7 @@ public class GoFundMeClient {
                                 Date eventDeadline = new Date(in.readLong());
 
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
 
                                 if (isCurrent) {
@@ -225,14 +211,13 @@ public class GoFundMeClient {
     }
 
     /**
-     * This method prompts the user for input using the provided prompt string and
-     * returns the input as a trimmed string.
-     * If the input is empty, the method will continue to prompt the user until a
-     * non-empty input is provided.
+     * Prompts the user for a string input and returns the value.
+     * If the user enters an empty string, the method will prompt the user to enter
+     * a non-empty string.
      * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt  the prompt string to display to the user
-     * @return the user's input as a trimmed string
+     * @param prompt  the message to display to the user when prompting for input
+     * @return the string entered by the user
      */
     private static String getStringInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
@@ -246,14 +231,13 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user for a double input and returns the value if it is greater
-     * than the specified minimum value.
+     * Prompts the user for a double input and returns the value.
      * If the user enters an invalid input, the method will prompt the user to enter
      * a positive number.
      * 
      * @param scanner  the Scanner object used to read user input
      * @param prompt   the message to display to the user when prompting for input
-     * @param minValue the minimum value that the input must be greater than
+     * @param minValue the minimum value of the input (exclusive)
      * @return the double value entered by the user
      */
     private static double getDoubleInput(Scanner scanner, String prompt, double minValue) {
@@ -274,15 +258,13 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user to enter a date in the format "MM-dd-yyyy" and returns a
-     * Date object.
-     * If the user enters an invalid date format, the method will prompt the user
-     * again until a valid date is entered.
+     * Prompts the user for a date input and returns the value.
+     * If the user enters an invalid input, the method will prompt the user to enter
+     * a date in the specified format.
      * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt  the prompt message to display to the user
-     * @return a Date object representing the user's input in the format
-     *         "MM-dd-yyyy"
+     * @param prompt  the message to display to the user when prompting for input
+     * @return the date entered by the user
      */
     private static Date getDateInput(Scanner scanner, String prompt) {
         System.out.print(prompt);

@@ -49,6 +49,7 @@ public class GoFundMeServer {
      * deadline, and current amount raised.
      */
     private static class FundraisingEvent {
+        int id;
         String name;
         double targetAmount;
         Date deadline;
@@ -64,6 +65,7 @@ public class GoFundMeServer {
          * @param deadline     the deadline for the fundraising event
          */
         public FundraisingEvent(String name, double targetAmount, Date deadline) {
+            this.id = events.size();
             this.name = name;
             this.targetAmount = targetAmount;
             this.deadline = deadline;
@@ -127,6 +129,8 @@ public class GoFundMeServer {
                     System.out.println("Received request: " + requestType + " from IP = "
                             + socket.getInetAddress().getHostAddress() + ", Port = " + socket.getPort());
 
+                    sortEvents();
+
                     switch (requestType) {
                         case "CREATE_EVENT":
                             createEvent();
@@ -149,6 +153,7 @@ public class GoFundMeServer {
                             System.out.println("Invalid request. Responded to client.");
                     }
                 }
+
             } catch (SocketException se) {
                 Date now = new Date();
                 System.out.println(
@@ -167,6 +172,18 @@ public class GoFundMeServer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+
+        // sort events by deadline
+        private void sortEvents() {
+            synchronized (events) {
+                Collections.sort(events, new Comparator<FundraisingEvent>() {
+                    @Override
+                    public int compare(FundraisingEvent o1, FundraisingEvent o2) {
+                        return o1.deadline.compareTo(o2.deadline);
+                    }
+                });
             }
         }
 
@@ -192,6 +209,7 @@ public class GoFundMeServer {
 
         /**
          * Sends a list of all fundraising events to the client.
+         * 
          * @throws IOException if an I/O error occurs
          */
         private void listEvents() throws IOException {
@@ -203,6 +221,7 @@ public class GoFundMeServer {
 
             out.writeInt(allEvents.size());
             for (FundraisingEvent event : allEvents) {
+                out.writeInt(event.id + 1);
                 out.writeBoolean(event.deadline.after(now));
                 out.writeUTF(event.name);
                 out.writeDouble(event.targetAmount);
@@ -226,19 +245,35 @@ public class GoFundMeServer {
         private void donate() throws IOException {
             int eventIndex = in.readInt();
             double donationAmount = in.readDouble();
-
+        
             synchronized (events) {
                 if (eventIndex < 0 || eventIndex >= events.size()) {
                     out.writeUTF("Invalid event index.");
                     return;
                 }
-
-                FundraisingEvent event = events.get(eventIndex);
-                event.currentAmount += donationAmount;
+        
+                FundraisingEvent selectedEvent = null;
+                // Find the event with the corresponding index
+                for (FundraisingEvent event : events) {
+                    if (event.id == eventIndex) {
+                        selectedEvent = event;
+                        break;
+                    }
+                }
+        
+                // If the event is null or has passed, send an error message
+                if (selectedEvent == null || selectedEvent.deadline.before(new Date())) {
+                    out.writeUTF("Event not found or it has already ended.");
+                    return;
+                }
+        
+                // Process the donation
+                selectedEvent.currentAmount += donationAmount;
             }
-
+        
             out.writeUTF("Donation successful. Thank you for your contribution!");
         }
+        
 
         /**
          * Reads an integer from the input stream and uses it to retrieve a
@@ -259,11 +294,16 @@ public class GoFundMeServer {
                     return;
                 }
 
-                FundraisingEvent event = events.get(eventIndex);
-                out.writeUTF(event.name);
-                out.writeDouble(event.targetAmount);
-                out.writeDouble(event.currentAmount);
-                out.writeLong(event.deadline.getTime());
+                // Get event by id attribute
+                for(FundraisingEvent event : events) {
+                    if(event.id == eventIndex) {
+                        out.writeUTF(event.name);
+                        out.writeDouble(event.targetAmount);
+                        out.writeDouble(event.currentAmount);
+                        out.writeLong(event.deadline.getTime());
+                        return;
+                    }
+                }
             }
         }
     }

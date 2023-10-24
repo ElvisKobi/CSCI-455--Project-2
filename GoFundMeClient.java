@@ -89,6 +89,7 @@ public class GoFundMeClient {
 
                             System.out.println("Current Fundraising Events:");
                             for (int i = 1; i <= totalEventCountForList; i++) {
+                                int eventIndex = in.readInt();
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
                                 double eventTargetAmount = in.readDouble();
@@ -96,7 +97,7 @@ public class GoFundMeClient {
                                 Date eventDeadline = new Date(in.readLong());
 
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
 
                                 if (isCurrent) {
@@ -126,6 +127,7 @@ public class GoFundMeClient {
                             pastEventsOutput = new ArrayList<>();
 
                             for (int i = 1; i <= totalEventCountForList; i++) {
+                                int eventIndex = in.readInt();
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
                                 double eventTargetAmount = in.readDouble();
@@ -133,7 +135,7 @@ public class GoFundMeClient {
                                 Date eventDeadline = new Date(in.readLong());
 
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
 
                                 if (isCurrent) {
@@ -171,6 +173,7 @@ public class GoFundMeClient {
                             pastEventsOutput = new ArrayList<>();
 
                             for (int i = 1; i <= totalEventCountForList; i++) {
+                                int eventIndex = in.readInt();
                                 boolean isCurrent = in.readBoolean();
                                 eventName = in.readUTF();
                                 double eventTargetAmount = in.readDouble();
@@ -178,7 +181,7 @@ public class GoFundMeClient {
                                 Date eventDeadline = new Date(in.readLong());
 
                                 String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        i, eventName, eventTargetAmount, eventCurrentAmount,
+                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
                                         new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
 
                                 if (isCurrent) {

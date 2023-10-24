@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -258,30 +259,47 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user for a date input and returns the value.
-     * If the user enters an invalid input, the method will prompt the user to enter
-     * a date in the specified format.
+     * Prompts the user to enter a date in MM-dd-yyyy format and returns a Date object.
+     * If the user enters an invalid date, the method will continue to prompt the user until a valid date is entered.
      * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt  the message to display to the user when prompting for input
-     * @return the date entered by the user
+     * @param prompt the prompt to display to the user
+     * @return a Date object representing the date entered by the user
      */
     private static Date getDateInput(Scanner scanner, String prompt) {
         System.out.print(prompt);
         Date date = null;
         while (date == null) {
             String input = scanner.nextLine();
-            try {
-                date = new SimpleDateFormat("MM-dd-yyyy").parse(input);
-            } catch (ParseException e) {
-                System.out.println("Invalid date format. Please enter the date in MM-dd-yyyy format.");
+            String[] dateParts = input.split("-");
+
+            if (dateParts.length != 3) {
+                System.out.println("Invalid format. Please enter the date in MM-dd-yyyy format.");
+                System.out.print(prompt);
+                continue;
             }
-            if (date == null) {
+
+            try {
+                int month = Integer.parseInt(dateParts[0]);
+                int day = Integer.parseInt(dateParts[1]);
+                int year = Integer.parseInt(dateParts[2]);
+
+                if (month < 1 || month > 12 || day < 1 || day > 31 || year <= 0) {
+                    throw new NumberFormatException();
+                }
+
+                DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+                df.setLenient(false);
+                date = df.parse(input);
+
+            } catch (NumberFormatException | ParseException e) {
+                System.out.println("Invalid date. ");
                 System.out.print(prompt);
             }
         }
         return date;
     }
+
 
     /**
      * This method prompts the user to enter an integer value within a specified

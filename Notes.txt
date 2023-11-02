@@ -1,7 +1,5 @@
 Notes for project:
 
-Spoke with the professor about the indexing because we have our code to keep their indexes throughout the process of listing the events out. No matter if they are current or past events. That is the events unique identifier. If we were to number them based on if they were current or past. Then when the user selects 4 to view event details, there would be multiple 4's also with the list being dynamic by reordering when new events are entered, I want the identifier to be the same regardless. Case being that client 1 has 2 current events then starts a donation. But a second client adds a new event that is newer, that would change the index if numbers from top to bottom 1,2,3,.. this would result in client 1 donating to the wrong event. This is why we elected to order them as asked but not to number them as asked. We number them with their original index and they keep that number. So they may be identified correctly no matter how many clients are running and creating new events. Professor said this is fine
-
 Also, we did not make a manual as that is what the readme.md is for. 
 
 Contributors:

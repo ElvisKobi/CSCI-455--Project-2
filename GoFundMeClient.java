@@ -71,6 +71,8 @@ public class GoFundMeClient {
     }
 
     private static void createEvent(Scanner scanner) throws IOException {
+        System.out.println("---------------------------------");
+
         String eventName = getStringInput(scanner, "Enter event name: ");
         double targetAmount = getDoubleInput(scanner, "Enter target amount: ", 0);
         Date deadline = getDateInput(scanner, "Enter deadline (in format MM-dd-yyyy): ");
@@ -100,6 +102,8 @@ public class GoFundMeClient {
 
         int numberOfCurrentEvents = dis.readInt();
         int numberOfPastEvents = dis.readInt();
+
+        System.out.println("---------------------------------");
 
         System.out.println("Current Events:");
         if (numberOfCurrentEvents == 0) {
@@ -142,13 +146,15 @@ public class GoFundMeClient {
 
     private static void donate(Scanner scanner) throws IOException {
         if (checkIfEventsExist()) {
+            System.out.println("---------------------------------");
+
             int eventIndex = getIntInput(scanner, "Enter event index: ", 0, Integer.MAX_VALUE);
             double donationAmount = getDoubleInput(scanner, "Enter donation amount: ", 0);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
             dos.writeUTF("DONATE");
-            dos.writeInt(eventIndex);
+            dos.writeInt(eventIndex - 1);
             dos.writeDouble(donationAmount);
 
             sendRequest(baos.toByteArray());
@@ -161,12 +167,14 @@ public class GoFundMeClient {
 
     private static void checkDetails(Scanner scanner) throws IOException {
         if (checkIfEventsExist()) {
+            System.out.println("---------------------------------");
+
             int eventIndex = getIntInput(scanner, "Enter event index: ", 0, Integer.MAX_VALUE);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
             dos.writeUTF("CHECK_DETAILS");
-            dos.writeInt(eventIndex);
+            dos.writeInt(eventIndex - 1);
 
             sendRequest(baos.toByteArray());
             byte[] responseData = receiveResponseData();

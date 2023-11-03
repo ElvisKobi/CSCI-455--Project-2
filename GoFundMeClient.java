@@ -5,211 +5,182 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * This class implements a client application that communicates with the
- * GoFundMeServer to create fundraising events, list fundraising events, donate
- * to fundraising events, and check fundraising event details.
- */
 public class GoFundMeClient {
 
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 12345;
+    private static DatagramSocket clientSocket;
+    private static InetAddress serverAddress;
 
-    /**
-     * The main method of the client application.
-     * 
-     * @param args command line arguments
-     * @throws InterruptedException
-     */
     public static void main(String[] args) throws InterruptedException {
-        while (true) { // Loop to allow for reconnect attempts
-            try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-                    DataInputStream in = new DataInputStream(socket.getInputStream());
-                    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-                    Scanner scanner = new Scanner(System.in)) {
+        try {
+            clientSocket = new DatagramSocket();
+            serverAddress = InetAddress.getByName(SERVER_ADDRESS);
+            Scanner scanner = new Scanner(System.in);
 
-                int totalEventCountForList = 0;
+            while (true) {
+                System.out.println("---------------------------------");
+                System.out.println("Choose an option:");
+                System.out.println("1. Create a new fundraising event");
+                System.out.println("2. List fundraising events");
+                System.out.println("3. Donate to an event");
+                System.out.println("4. Check event details");
+                System.out.println("5. Exit");
 
-                while (true) {
-                    System.out.println("---------------------------------");
-                    System.out.println("Choose an option:");
-                    System.out.println("1. Create a new fundraising event");
-                    System.out.println("2. List fundraising events");
-                    System.out.println("3. Donate to an event");
-                    System.out.println("4. Check event details");
-                    System.out.println("5. Exit");
+                int choice = getIntInput(scanner, "Enter your choice: ", 1, 5);
 
-                    int choice = getIntInput(scanner, "Enter your choice: ", 1, 5);
-
-                    switch (choice) {
-                        case 1:
-                            System.out.println("---------------------------------");
-                            String eventName = getStringInput(scanner, "Enter event name: ");
-                            double targetAmount = getDoubleInput(scanner, "Enter target amount: ", 0);
-                            Date deadline = getDateInput(scanner, "Enter deadline (in format MM-dd-yyyy): ");
-
-                            out.writeUTF("CREATE_EVENT");
-                            out.writeUTF(eventName);
-                            out.writeDouble(targetAmount);
-                            out.writeLong(deadline.getTime());
-
-                            String response = in.readUTF();
-                            System.out.println(response);
-                            totalEventCountForList++; // Total event increment
-                            break;
-
-                        case 2:
-                            System.out.println("---------------------------------");
-                            out.writeUTF("LIST_EVENTS");
-                            totalEventCountForList = in.readInt();
-
-                            // Check for created events
-                            if (totalEventCountForList == 0) {
-                                System.out.println("No Event Available. Please create an event first!");
-                                break;
-                            }
-
-                            List<String> pastEventsOutput = new ArrayList<>();
-
-                            System.out.println("Current Fundraising Events:");
-                            for (int i = 1; i <= totalEventCountForList; i++) {
-                                int eventIndex = in.readInt();
-                                boolean isCurrent = in.readBoolean();
-                                eventName = in.readUTF();
-                                double eventTargetAmount = in.readDouble();
-                                double eventCurrentAmount = in.readDouble();
-                                Date eventDeadline = new Date(in.readLong());
-
-                                String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
-
-                                if (isCurrent) {
-                                    System.out.print(output);
-                                } else {
-                                    pastEventsOutput.add(output);
-                                }
-                            }
-
-                            System.out.println("\nPast Fundraising Events:");
-                            for (String pastEvent : pastEventsOutput) {
-                                System.out.print(pastEvent);
-                            }
-                            break;
-
-                        case 3:
-                            // Case 2 in background
-                            out.writeUTF("LIST_EVENTS");
-                            totalEventCountForList = in.readInt();
-
-                            // Check for created events
-                            if (totalEventCountForList == 0) {
-                                System.out.println("No Event Available. Please create an event first!");
-                                break;
-                            }
-
-                            pastEventsOutput = new ArrayList<>();
-
-                            for (int i = 1; i <= totalEventCountForList; i++) {
-                                int eventIndex = in.readInt();
-                                boolean isCurrent = in.readBoolean();
-                                eventName = in.readUTF();
-                                double eventTargetAmount = in.readDouble();
-                                double eventCurrentAmount = in.readDouble();
-                                Date eventDeadline = new Date(in.readLong());
-
-                                String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
-
-                                if (isCurrent) {
-                                    continue;
-                                } else {
-                                    pastEventsOutput.add(output);
-                                }
-                            }
-
-                            // Case 3
-                            System.out.println("---------------------------------");
-                            int eventIndexForDonate = getIntInput(scanner, "Enter event index: ", 1,
-                                    totalEventCountForList) - 1; // Use the totalEventCountForList
-                            double donationAmount = getDoubleInput(scanner, "Enter donation amount: ", 0);
-
-                            out.writeUTF("DONATE");
-                            out.writeInt(eventIndexForDonate);
-                            out.writeDouble(donationAmount);
-
-                            String responseForDonate = in.readUTF();
-                            System.out.println(responseForDonate);
-                            break;
-
-                        case 4:
-                            // Case 2 in background
-                            out.writeUTF("LIST_EVENTS");
-                            totalEventCountForList = in.readInt();
-
-                            // Check for created events
-                            if (totalEventCountForList == 0) {
-                                System.out.println("No Event Available. Please create an event first!");
-                                break;
-                            }
-
-                            pastEventsOutput = new ArrayList<>();
-
-                            for (int i = 1; i <= totalEventCountForList; i++) {
-                                int eventIndex = in.readInt();
-                                boolean isCurrent = in.readBoolean();
-                                eventName = in.readUTF();
-                                double eventTargetAmount = in.readDouble();
-                                double eventCurrentAmount = in.readDouble();
-                                Date eventDeadline = new Date(in.readLong());
-
-                                String output = String.format("%d. %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                                        eventIndex, eventName, eventTargetAmount, eventCurrentAmount,
-                                        new SimpleDateFormat("MM-dd-yyyy").format(eventDeadline));
-
-                                if (isCurrent) {
-                                    continue;
-                                } else {
-                                    pastEventsOutput.add(output);
-                                }
-                            }
-
-                            // Case 4
-                            System.out.println("---------------------------------");
-                            int eventIndex4 = getIntInput(scanner, "Enter event index: ", 1, totalEventCountForList)
-                                    - 1; // Use the totalEventCountForList
-
-                            out.writeUTF("CHECK_DETAILS");
-                            out.writeInt(eventIndex4);
-
-                            String checkEventName = in.readUTF(); // Renamed to avoid conflict
-                            double checkTargetAmount = in.readDouble();
-                            double checkCurrentAmount = in.readDouble();
-                            Date checkDeadline = new Date(in.readLong());
-                            System.out.printf(
-                                    "Event Details:\nName: %s\nTarget Amount: $%.2f\nAmount Raised: $%.2f\nDeadline: %s\n",
-                                    checkEventName, checkTargetAmount, checkCurrentAmount,
-                                    new SimpleDateFormat("MM-dd-yyyy").format(checkDeadline));
-                            break;
-
-                        case 5:
-                            System.out.println("Exiting...");
-                            return;
-                        default:
-                            System.out.println("Invalid choice. Please try again.");
-                    }
+                switch (choice) {
+                    case 1:
+                        createEvent(scanner);
+                        break;
+                    case 2:
+                        listEvents();
+                        break;
+                    case 3:
+                        donate(scanner);
+                        break;
+                    case 4:
+                        checkDetails(scanner);
+                        break;
+                    case 5:
+                        System.out.println("Exiting...");
+                        clientSocket.close();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
                 }
+            }
+        } catch (UnknownHostException e) {
+            System.err.println("Server not found: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("I/O Error: " + e.getMessage());
+            Thread.sleep(2000); // 2 seconds delay before retrying
+        }
+    }
 
-            } catch (SocketException se) {
-                System.out.println("Lost connection to server. Trying to reconnect...");
-                // Add a sleep here if you want to introduce a delay before retrying
-                Thread.sleep(2000); // 2 seconds delay
-            } catch (IOException e) {
-                e.printStackTrace();
+    private static void sendRequest(byte[] sendData) throws IOException {
+        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, SERVER_PORT);
+        clientSocket.send(sendPacket);
+    }
+
+    private static String receiveResponse() throws IOException {
+        byte[] receiveData = new byte[1024];
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        clientSocket.receive(receivePacket);
+        return new String(receivePacket.getData(), 0, receivePacket.getLength());
+    }
+
+    private static void createEvent(Scanner scanner) throws IOException {
+        String eventName = getStringInput(scanner, "Enter event name: ");
+        double targetAmount = getDoubleInput(scanner, "Enter target amount: ", 0);
+        Date deadline = getDateInput(scanner, "Enter deadline (in format MM-dd-yyyy): ");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeUTF("CREATE_EVENT");
+        dos.writeUTF(eventName);
+        dos.writeDouble(targetAmount);
+        dos.writeLong(deadline.getTime());
+
+        sendRequest(baos.toByteArray());
+        String response = receiveResponse();
+        System.out.println(response);
+    }
+
+    private static void listEvents() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeUTF("LIST_EVENTS");
+
+        sendRequest(baos.toByteArray());
+
+        byte[] responseData = receiveResponseData();
+        ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
+        DataInputStream dis = new DataInputStream(bais);
+
+        int numberOfEvents = dis.readInt();
+        if (numberOfEvents == 0) {
+            System.out.println("There are currently no fundraising events.");
+        } else {
+            for (int i = 0; i < numberOfEvents; i++) {
+                int id = dis.readInt();
+                String name = dis.readUTF();
+                double targetAmount = dis.readDouble();
+                double currentAmount = dis.readDouble();
+                long deadlineMillis = dis.readLong();
+                Date deadline = new Date(deadlineMillis);
+
+                System.out.printf("%d: %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
+                        id, name, targetAmount, currentAmount, deadline.toString());
             }
         }
     }
+
+    private static byte[] receiveResponseData() throws IOException {
+        byte[] receiveData = new byte[1024];
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        clientSocket.receive(receivePacket);
+        return Arrays.copyOf(receivePacket.getData(), receivePacket.getLength());
+    }
+
+    private static void donate(Scanner scanner) throws IOException {
+        if (checkIfEventsExist()) {
+            int eventIndex = getIntInput(scanner, "Enter event index: ", 0, Integer.MAX_VALUE);
+            double donationAmount = getDoubleInput(scanner, "Enter donation amount: ", 0);
+    
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            dos.writeUTF("DONATE");
+            dos.writeInt(eventIndex);
+            dos.writeDouble(donationAmount);
+    
+            sendRequest(baos.toByteArray());
+            String response = receiveResponse();
+            System.out.println(response);
+        } else {
+            System.out.println("There are currently no fundraising events to donate to.");
+        }
+    }
+    
+    private static void checkDetails(Scanner scanner) throws IOException {
+        if (checkIfEventsExist()) {
+            int eventIndex = getIntInput(scanner, "Enter event index: ", 0, Integer.MAX_VALUE);
+    
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            dos.writeUTF("CHECK_DETAILS");
+            dos.writeInt(eventIndex);
+    
+            sendRequest(baos.toByteArray());
+            byte[] responseData = receiveResponseData();
+            ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
+            DataInputStream dis = new DataInputStream(bais);
+    
+            String name = dis.readUTF();
+            double targetAmount = dis.readDouble();
+            double currentAmount = dis.readDouble();
+            long deadlineMillis = dis.readLong();
+            Date deadline = new Date(deadlineMillis);
+    
+            System.out.printf("Name: %s\nTarget Amount: %.2f\nCurrent Amount: %.2f\nDeadline: %s\n",
+                    name, targetAmount, currentAmount, deadline.toString());
+        } else {
+            System.out.println("There are currently no fundraising events to check details for.");
+        }
+    }
+    
+    private static boolean checkIfEventsExist() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeUTF("CHECK_EVENTS_EXIST");
+    
+        sendRequest(baos.toByteArray());
+        byte[] responseData = receiveResponseData();
+        ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
+        DataInputStream dis = new DataInputStream(bais);
+    
+        return dis.readBoolean();
+    }    
 
     /**
      * Prompts the user for a string input and returns the value.
@@ -259,11 +230,13 @@ public class GoFundMeClient {
     }
 
     /**
-     * Prompts the user to enter a date in MM-dd-yyyy format and returns a Date object.
-     * If the user enters an invalid date, the method will continue to prompt the user until a valid date is entered.
+     * Prompts the user to enter a date in MM-dd-yyyy format and returns a Date
+     * object.
+     * If the user enters an invalid date, the method will continue to prompt the
+     * user until a valid date is entered.
      * 
      * @param scanner the Scanner object used to read user input
-     * @param prompt the prompt to display to the user
+     * @param prompt  the prompt to display to the user
      * @return a Date object representing the date entered by the user
      */
     private static Date getDateInput(Scanner scanner, String prompt) {
@@ -299,7 +272,6 @@ public class GoFundMeClient {
         }
         return date;
     }
-
 
     /**
      * This method prompts the user to enter an integer value within a specified

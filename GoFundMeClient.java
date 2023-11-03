@@ -98,22 +98,39 @@ public class GoFundMeClient {
         ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
         DataInputStream dis = new DataInputStream(bais);
 
-        int numberOfEvents = dis.readInt();
-        if (numberOfEvents == 0) {
-            System.out.println("There are currently no fundraising events.");
-        } else {
-            for (int i = 0; i < numberOfEvents; i++) {
-                int id = dis.readInt();
-                String name = dis.readUTF();
-                double targetAmount = dis.readDouble();
-                double currentAmount = dis.readDouble();
-                long deadlineMillis = dis.readLong();
-                Date deadline = new Date(deadlineMillis);
+        int numberOfCurrentEvents = dis.readInt();
+        int numberOfPastEvents = dis.readInt();
 
-                System.out.printf("%d: %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
-                        id, name, targetAmount, currentAmount, deadline.toString());
+        System.out.println("Current Events:");
+        if (numberOfCurrentEvents == 0) {
+            System.out.println("There are currently no ongoing fundraising events.");
+        } else {
+            for (int i = 0; i < numberOfCurrentEvents; i++) {
+                printEventDetails(dis);
             }
         }
+
+        System.out.println("\nPast Events:");
+        if (numberOfPastEvents == 0) {
+            System.out.println("There are no past fundraising events.");
+        } else {
+            for (int i = 0; i < numberOfPastEvents; i++) {
+                printEventDetails(dis);
+            }
+        }
+    }
+
+    private static void printEventDetails(DataInputStream dis) throws IOException {
+        int id = dis.readInt();
+        String name = dis.readUTF();
+        double targetAmount = dis.readDouble();
+        double currentAmount = dis.readDouble();
+        long deadlineMillis = dis.readLong();
+        Date deadline = new Date(deadlineMillis);
+
+        // Display the id directly as it already starts from 1
+        System.out.printf("%d: %s (Target: $%.2f, Raised: $%.2f, Deadline: %s)\n",
+                id + 1, name, targetAmount, currentAmount, deadline.toString());
     }
 
     private static byte[] receiveResponseData() throws IOException {
@@ -127,13 +144,13 @@ public class GoFundMeClient {
         if (checkIfEventsExist()) {
             int eventIndex = getIntInput(scanner, "Enter event index: ", 0, Integer.MAX_VALUE);
             double donationAmount = getDoubleInput(scanner, "Enter donation amount: ", 0);
-    
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
             dos.writeUTF("DONATE");
             dos.writeInt(eventIndex);
             dos.writeDouble(donationAmount);
-    
+
             sendRequest(baos.toByteArray());
             String response = receiveResponse();
             System.out.println(response);
@@ -141,46 +158,46 @@ public class GoFundMeClient {
             System.out.println("There are currently no fundraising events to donate to.");
         }
     }
-    
+
     private static void checkDetails(Scanner scanner) throws IOException {
         if (checkIfEventsExist()) {
             int eventIndex = getIntInput(scanner, "Enter event index: ", 0, Integer.MAX_VALUE);
-    
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
             dos.writeUTF("CHECK_DETAILS");
             dos.writeInt(eventIndex);
-    
+
             sendRequest(baos.toByteArray());
             byte[] responseData = receiveResponseData();
             ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
             DataInputStream dis = new DataInputStream(bais);
-    
+
             String name = dis.readUTF();
             double targetAmount = dis.readDouble();
             double currentAmount = dis.readDouble();
             long deadlineMillis = dis.readLong();
             Date deadline = new Date(deadlineMillis);
-    
+
             System.out.printf("Name: %s\nTarget Amount: %.2f\nCurrent Amount: %.2f\nDeadline: %s\n",
                     name, targetAmount, currentAmount, deadline.toString());
         } else {
             System.out.println("There are currently no fundraising events to check details for.");
         }
     }
-    
+
     private static boolean checkIfEventsExist() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
         dos.writeUTF("CHECK_EVENTS_EXIST");
-    
+
         sendRequest(baos.toByteArray());
         byte[] responseData = receiveResponseData();
         ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
         DataInputStream dis = new DataInputStream(bais);
-    
+
         return dis.readBoolean();
-    }    
+    }
 
     /**
      * Prompts the user for a string input and returns the value.

@@ -120,8 +120,29 @@ public class GoFundMeServer {
         DataOutputStream dos = new DataOutputStream(baos);
 
         synchronized (events) {
-            dos.writeInt(events.size());
+            List<FundraisingEvent> currentEvents = new ArrayList<>();
+            List<FundraisingEvent> pastEvents = new ArrayList<>();
+
             for (FundraisingEvent event : events) {
+                if (event.deadline.after(new Date())) {
+                    currentEvents.add(event);
+                } else {
+                    pastEvents.add(event);
+                }
+            }
+
+            dos.writeInt(currentEvents.size());
+            dos.writeInt(pastEvents.size());
+
+            for (FundraisingEvent event : currentEvents) {
+                dos.writeInt(event.id);
+                dos.writeUTF(event.name);
+                dos.writeDouble(event.targetAmount);
+                dos.writeDouble(event.currentAmount);
+                dos.writeLong(event.deadline.getTime());
+            }
+
+            for (FundraisingEvent event : pastEvents) {
                 dos.writeInt(event.id);
                 dos.writeUTF(event.name);
                 dos.writeDouble(event.targetAmount);
@@ -177,6 +198,8 @@ public class GoFundMeServer {
         double currentAmount;
 
         public FundraisingEvent(String name, double targetAmount, Date deadline) {
+            // this.id = events.size() + 1; // Change from events.size() to events.size() +
+            // 1
             this.id = events.size();
             this.name = name;
             this.targetAmount = targetAmount;

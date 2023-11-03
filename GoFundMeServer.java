@@ -164,6 +164,12 @@ public class GoFundMeServer {
             }
 
             FundraisingEvent selectedEvent = events.get(eventIndex);
+
+            // Check if the event deadline has passed
+            if (selectedEvent.deadline.before(new Date())) {
+                return "Donation failed. The event has already ended.".getBytes();
+            }
+
             selectedEvent.currentAmount += donationAmount;
         }
 

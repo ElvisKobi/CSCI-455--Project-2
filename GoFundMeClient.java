@@ -5,6 +5,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * The GoFundMeClient class is a client program that allows users to create, list, and donate to fundraising events.
+ * It connects to a server using a DatagramSocket and sends requests to the server to perform actions.
+ * The class contains methods for creating a new event, listing all events, donating to an event, and checking event details.
+ * The main method of the class prompts the user to choose an option from a menu and performs the corresponding action based on the user's choice.
+ * The class also contains helper methods for sending and receiving datagram packets to and from the server.
+ */
 public class GoFundMeClient {
 
     private static final String SERVER_ADDRESS = "localhost";
@@ -12,6 +19,14 @@ public class GoFundMeClient {
     private static DatagramSocket clientSocket;
     private static InetAddress serverAddress;
 
+    /**
+     * This method is the main method of the GoFundMeClient class. It creates a DatagramSocket and connects to the server. 
+     * It then prompts the user to choose an option from a menu and performs the corresponding action based on the user's choice.
+     * The options include creating a new fundraising event, listing fundraising events, donating to an event, checking event details, and exiting the program.
+     * 
+     * @param args an array of command-line arguments for the program
+     * @throws InterruptedException if the thread is interrupted while sleeping
+     */
     public static void main(String[] args) throws InterruptedException {
         try {
             clientSocket = new DatagramSocket();
@@ -58,11 +73,22 @@ public class GoFundMeClient {
         }
     }
 
+    /**
+     * Sends a datagram packet to the server with the specified data.
+     * 
+     * @param sendData the data to be sent in the packet
+     * @throws IOException if an I/O error occurs while sending the packet
+     */
     private static void sendRequest(byte[] sendData) throws IOException {
         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, SERVER_PORT);
         clientSocket.send(sendPacket);
     }
 
+    /**
+     * Receives a response from the server.
+     * @return the response received from the server as a String.
+     * @throws IOException if an I/O error occurs.
+     */
     private static String receiveResponse() throws IOException {
         byte[] receiveData = new byte[1024];
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -70,6 +96,12 @@ public class GoFundMeClient {
         return new String(receivePacket.getData(), 0, receivePacket.getLength());
     }
 
+    /**
+     * Creates a new fundraising event by prompting the user to input the event name, target amount, and deadline.
+     * Then, it sends a request to the server with the event information and receives a response.
+     * @param scanner a Scanner object used to read user input
+     * @throws IOException if an I/O error occurs
+     */
     private static void createEvent(Scanner scanner) throws IOException {
         System.out.println("---------------------------------");
 
@@ -89,6 +121,13 @@ public class GoFundMeClient {
         System.out.println(response);
     }
 
+    /**
+     * Sends a request to the server to list all fundraising events and prints the details of each event.
+     * The method sends a "LIST_EVENTS" message to the server and receives the response data.
+     * The response data contains the number of current and past events, followed by the details of each event.
+     * If there are no current or past events, the method prints a message indicating so.
+     * @throws IOException if an I/O error occurs while sending or receiving data.
+     */
     private static void listEvents() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
@@ -124,6 +163,13 @@ public class GoFundMeClient {
         }
     }
 
+    /**
+     * Reads and prints the details of an event from the given DataInputStream.
+     * The details include the event ID, name, target amount, current amount raised, and deadline.
+     * 
+     * @param dis the DataInputStream to read the event details from
+     * @throws IOException if there is an error reading from the DataInputStream
+     */
     private static void printEventDetails(DataInputStream dis) throws IOException {
         int id = dis.readInt();
         String name = dis.readUTF();
@@ -137,6 +183,11 @@ public class GoFundMeClient {
                 id + 1, name, targetAmount, currentAmount, deadline.toString());
     }
 
+    /**
+     * Receives response data from the server.
+     * @return the received data as a byte array
+     * @throws IOException if an I/O error occurs
+     */
     private static byte[] receiveResponseData() throws IOException {
         byte[] receiveData = new byte[1024];
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -144,6 +195,16 @@ public class GoFundMeClient {
         return Arrays.copyOf(receivePacket.getData(), receivePacket.getLength());
     }
 
+    /**
+     * Allows the user to donate to a fundraising event if there are any available.
+     * Prompts the user to enter the index of the event they want to donate to and the amount they want to donate.
+     * Sends a request to the server with the event index and donation amount.
+     * Receives and prints the response from the server.
+     * If there are no fundraising events available, prints a message indicating so.
+     *
+     * @param scanner a Scanner object used to get user input
+     * @throws IOException if there is an error with the input/output streams
+     */
     private static void donate(Scanner scanner) throws IOException {
         if (checkIfEventsExist()) {
             System.out.println("---------------------------------");
@@ -165,6 +226,14 @@ public class GoFundMeClient {
         }
     }
 
+    /**
+     * This method checks the details of a fundraising event by prompting the user to enter the event index.
+     * If the event exists, it sends a request to the server to retrieve the event details and displays them to the user.
+     * Otherwise, it informs the user that there are no fundraising events to check details for.
+     *
+     * @param scanner a Scanner object used to read user input
+     * @throws IOException if an I/O error occurs while sending or receiving data from the server
+     */
     private static void checkDetails(Scanner scanner) throws IOException {
         if (checkIfEventsExist()) {
             System.out.println("---------------------------------");

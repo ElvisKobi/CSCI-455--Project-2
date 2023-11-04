@@ -159,20 +159,18 @@ public class GoFundMeServer {
 
     /**
      * Returns a byte array containing the list of current and past fundraising events.
-     * The byte array contains the event id, name, target amount, current amount, and deadline for each event.
-     * Events are separated into current and past events based on whether their deadline is after the current date.
-     * 
-     * @return a byte array containing the list of current and past fundraising events
-     * @throws IOException if an I/O error occurs
+     * The events are sorted by deadline and the byte array is generated using DataOutputStream.
+     * @return a byte array containing the list of current and past fundraising events.
+     * @throws IOException if an I/O error occurs.
      */
     private static byte[] listEvents() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
-
+    
         synchronized (events) {
             List<FundraisingEvent> currentEvents = new ArrayList<>();
             List<FundraisingEvent> pastEvents = new ArrayList<>();
-
+    
             for (FundraisingEvent event : events) {
                 if (event.deadline.after(new Date())) {
                     currentEvents.add(event);
@@ -180,10 +178,15 @@ public class GoFundMeServer {
                     pastEvents.add(event);
                 }
             }
-
+    
+            // Sort the events by deadline
+            Comparator<FundraisingEvent> byDeadline = Comparator.comparing(e -> e.deadline);
+            currentEvents.sort(byDeadline);
+            pastEvents.sort(byDeadline);
+    
             dos.writeInt(currentEvents.size());
             dos.writeInt(pastEvents.size());
-
+    
             for (FundraisingEvent event : currentEvents) {
                 dos.writeInt(event.id);
                 dos.writeUTF(event.name);
@@ -191,7 +194,7 @@ public class GoFundMeServer {
                 dos.writeDouble(event.currentAmount);
                 dos.writeLong(event.deadline.getTime());
             }
-
+    
             for (FundraisingEvent event : pastEvents) {
                 dos.writeInt(event.id);
                 dos.writeUTF(event.name);
@@ -200,9 +203,9 @@ public class GoFundMeServer {
                 dos.writeLong(event.deadline.getTime());
             }
         }
-
+    
         return baos.toByteArray();
-    }
+    }    
 
     /**
      * This method processes a donation by reading the event index and donation amount from the input stream.

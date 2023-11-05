@@ -40,3 +40,8 @@ The server will automatically handle incoming client requests for the above oper
 ## Exception Handling
 
 Exception handling is implemented using try-catch blocks to ensure robustness against erroneous input and to manage I/O exceptions.
+
+## Contributors 
+
+- [Christopher Robinson](<https://github.com/Christopher-C-Robinson>)
+- [Elvis Acheampong](<https://github.com/ElvisKobi>)

@@ -4,7 +4,7 @@ We left the same indexing fuctionality that we had in the first project where we
 them from thier respective list as we want the user to be able to identify the events by thier 
 id as we dont want to limit the names to be unique. This makes it more scalable.
 
-Manual and readme shouls have everything needed to run the program. 
+Manual and readme should have everything needed to run the program. 
 
 Contributors:
 Christopher Robinson 
